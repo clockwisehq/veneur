@@ -3,6 +3,7 @@ package veneur
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
@@ -30,7 +31,14 @@ func NewKubernetesDiscoverer() (*KubernetesDiscoverer, error) {
 }
 
 func (kd *KubernetesDiscoverer) GetDestinationsForService(serviceName string) ([]string, error) {
+	targetPort := "http"
+	if idx := strings.Index(serviceName, ":"); idx != -1 {
+		targetPort = serviceName[idx+1:]
+		serviceName = serviceName[:idx]
+	}
+
 	pods, err := kd.clientset.CoreV1().Pods(metav1.NamespaceAll).List(metav1.ListOptions{
+		// TODO use serviceName
 		LabelSelector: "app=veneur-global",
 	})
 	if err != nil {
@@ -50,9 +58,9 @@ func (kd *KubernetesDiscoverer) GetDestinationsForService(serviceName string) ([
 		if len(pod.Spec.Containers) > 0 {
 			for _, container := range pod.Spec.Containers {
 				for _, port := range container.Ports {
-					if port.Name == "http" {
+					if port.Name == targetPort {
 						forwardPort = strconv.Itoa(int(port.ContainerPort))
-						log.WithField("port", forwardPort).Debug("Found http port")
+						log.WithField("port", forwardPort).Debug("Found target port")
 						break
 					}
 
