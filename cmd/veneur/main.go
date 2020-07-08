@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/getsentry/raven-go"
+	"github.com/sercand/kuberesolver"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/veneur"
 	"github.com/stripe/veneur/ssf"
@@ -47,6 +48,10 @@ func main() {
 	}
 
 	logger := logrus.StandardLogger()
+	// This is safe outside of a cluster althouth attempting to use a
+	// kubernetes:// url will cause a failure.
+	kuberesolver.RegisterInCluster()
+
 	server, err := veneur.NewFromConfig(logger, conf)
 	veneur.SetLogger(logger)
 	if err != nil {

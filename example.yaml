@@ -40,6 +40,10 @@ tls_authority_certificate: ""
 # Use a static host for forwarding
 #forward_address: "http://veneur.example.com"
 # Do not add a prefix when setting the forward address for gRPC.
+# If using grpc in a kubernetes cluster, you may use urls compatible with
+# https://github.com/sercand/kuberesolver to get better native load balancing
+# behavior than the connection-based load balancing provided by kubernetes
+# services.
 #forward_address: "veneur.example.com"
 forward_address: ""
 
